@@ -8,7 +8,7 @@ debugDir=debug
 
 all : $(releaseDir) $(debugDir)
 	cd $(releaseDir) && cmake ..
-	cd $(debugDir) && cmake .. -DCMAKE_BUILD_TYPE=Debug
+	cd $(debugDir) && cmake .. -DCMAKE_CXX_FLAGS=-pg -DCMAKE_EXE_LINKER_FLAGS=-pg -DCMAKE_SHARED_LINKER_FLAGS=-pg
 
 
 $(releaseDir) : 
