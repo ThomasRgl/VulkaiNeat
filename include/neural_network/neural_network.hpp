@@ -5,6 +5,7 @@
 
 #include <memory>
 
+//
 class Layer
 {
 private :
@@ -12,14 +13,14 @@ private :
     std::vector<double> m_bias;
     std::vector<double> m_weights;
 
-    void initWeigth(); // initialise les poids 
-    void initBias();
+    void initWeigth( int previousLayerSize ); // initialise les poids 
+    //void initBias();
 
 public :
 
     Layer(int neurons, Layer* previous_layer = nullptr);
 
-    Layer(Layer const& other);
+    Layer(Layer const& other); //pourquoi ne pas mettre de void en retour
     Layer(Layer&& other);
 
     Layer& operator=(Layer const& other);
@@ -34,7 +35,7 @@ public :
     }
 
 
-    void init();
+    //void init();
     void compute(Layer const& previous);
     void compute(std::vector<double> const& inputs);
     void mutate(); //mute un nn 
@@ -89,7 +90,7 @@ public :
     Layer& operator[](size_t index);
     Layer const& operator[](size_t index) const;
 
-    void init();
+    //void init();
 
     size_t compute(std::vector<double> const& inputs); //lance le calcul du nn 
     size_t output() const; //va chercher le résultat du calcul
@@ -112,6 +113,7 @@ class Game {
 
     virtual bool operator() (NeuralNetwork& nn) = 0;
 };
+
 
 //
 class Population
@@ -144,6 +146,7 @@ public:
     NeuralNetwork const& operator[](size_t index) const;
 };
 
+//
 class NeuralPrinter {
     void printNetwork(NeuralNetwork const& nn);//affichage 
     void printPopulaton(Population const& pop);//print population
