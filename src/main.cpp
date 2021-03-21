@@ -60,11 +60,9 @@ int main() {
 
     testGame mabite;
 
-    for (int i = 0; i < 2000; i++)
+    for (int i = 0; i < 300; i++)
     {
         test_populace.run(mabite);
-        if (i % 10 == 0)
-            std::cout << i << '\n';
     }
 
     return 0;

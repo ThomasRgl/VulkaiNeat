@@ -89,9 +89,12 @@ namespace neuralnetwork
         size_t m_size;
 
         double m_score;
-        double m_fitness;
+        
 
     public:
+
+        double m_fitness;
+
         NeuralNetwork(NeuralParameters const &params);
         NeuralNetwork(NeuralNetwork const &other);
         NeuralNetwork(NeuralNetwork&& other);
@@ -120,7 +123,7 @@ namespace neuralnetwork
             return m_score;
         }
 
-        void fitness(double fitness) {
+        inline void fitness(double fitness) {
             m_fitness = fitness;
         } // set le fitness d'un nn
 

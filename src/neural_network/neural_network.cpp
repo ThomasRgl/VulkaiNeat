@@ -98,10 +98,10 @@ namespace neuralnetwork
 
     void Layer::mutate(double const mutation_rate) {
         for (auto& i : m_bias) 
-            if( mutation_rate > (double) rand() / RAND_MAX) { i += normalRandom() * 0.05;}
+            if( mutation_rate > (double) rand() / (double) RAND_MAX) { i += normalRandom() * 0.05;}
             
         for (auto& i : m_weights)
-            if( mutation_rate > (double) rand() / (double)RAND_MAX) { i += normalRandom() * 0.05;}
+            if( mutation_rate > (double) rand() / (double) RAND_MAX) { i += normalRandom() * 0.05;}
         
     }
 
@@ -269,7 +269,7 @@ namespace neuralnetwork
         auto& population = *m_curr_population;
 
         while ( r > 0) {
-            r -= population[index].fitness();
+            r -= population[index].m_fitness;
 
             index += 1;
         }
@@ -299,7 +299,6 @@ namespace neuralnetwork
 
             tmp.crossover(pickOne(), pickOne(), m_params.crossover_rate);
             tmp.mutate(m_params.mutation_rate);
-            tmp.score(0);
         }
         std::swap(m_curr_population, m_old_population);
     }
@@ -313,7 +312,6 @@ namespace neuralnetwork
 
         m_curr_population = &m_first_population;
         m_old_population = &m_second_population;
-
     }
 
     Population::Population(Population const &other) {
@@ -343,7 +341,7 @@ namespace neuralnetwork
     }
 
     void Population::run(Game &game){
-        auto& population = *m_curr_population;
+        std::vector<NeuralNetwork>& population = *m_curr_population;
 
         for (auto& i : population) {
             game(i);
@@ -353,7 +351,7 @@ namespace neuralnetwork
     }
 
     NeuralNetwork &Population::bestElement(){
-        auto& population = *m_curr_population;
+        std::vector<NeuralNetwork>& population = *m_curr_population;
 
         NeuralNetwork* res = &population[0];
         size_t max = population[0].score();
