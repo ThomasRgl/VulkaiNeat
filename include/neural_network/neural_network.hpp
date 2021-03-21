@@ -5,155 +5,191 @@
 
 #include <memory>
 
-//
-class Layer
+namespace neuralnetwork
 {
-private :
-    std::vector<double> m_neurons;
-    std::vector<double> m_bias;
-    std::vector<double> m_weights;
 
-    void initWeigth( int previousLayerSize ); // initialise les poids 
-    //void initBias();
+    //
+    class Layer
+    {
+    private:
+        std::vector<double> m_neurons;
+        std::vector<double> m_bias;
+        std::vector<double> m_weights;
 
-public :
+        void initWeigth(int previousLayerSize); // initialise les poids
+        //void initBias();
 
-    Layer(int neurons, Layer* previous_layer = nullptr);
+    public:
+        Layer(int neurons, Layer *previous_layer = nullptr);
 
-    Layer(Layer const& other); //pourquoi ne pas mettre de void en retour
-    Layer(Layer&& other);
+        Layer(Layer const &other);
+        Layer(Layer&& other);
 
-    Layer& operator=(Layer const& other);
-    Layer& operator=(Layer&& other);
+        Layer &operator=(Layer const &other);
+        Layer &operator=(Layer &&other);
 
-    double const& operator[](unsigned int index) const {
-        return m_neurons[index];
-    }
+        double const &operator[](unsigned int index) const
+        {
+            return m_neurons[index];
+        }
 
-    double& operator[](unsigned int index) {
-        return m_neurons[index];
-    }
+        double &operator[](unsigned int index)
+        {
+            return m_neurons[index];
+        }
 
+        //void init();
+        void compute(Layer const &previous);
+        void compute(std::vector<double> const &inputs);
+        void mutate(double const mutation_rate); //mute un nn
 
-    //void init();
-    void compute(Layer const& previous);
-    void compute(std::vector<double> const& inputs);
-    void mutate(); //mute un nn 
+        std::vector<double> &weights()
+        {
+            return m_weights;
+        }
 
-    std::vector<double>& weights() {
-        return m_weights;
-    }
+        std::vector<double> const &weights() const
+        {
+            return m_weights;
+        }
 
-    std::vector<double>& bias() {
-        return m_bias;
-    }
+        std::vector<double> &bias()
+        {
+            return m_bias;
+        }
 
-    size_t size() const {
-        return m_neurons.size();
-    }
+        std::vector<double> const &bias() const
+        {
+            return m_bias;
+        }
 
-};
+        size_t size() const
+        {
+            return m_neurons.size();
+        }
+    };
 
+    //
+    struct NeuralParameters
+    {
+        unsigned int nhiddenlayer;
+        unsigned int ninput;
+        unsigned int nhidden;
+        unsigned int noutput;
+        double crossover_rate;
+        double mutation_rate;
+    };
 
-//
-struct NeuralParameters
-{
-    unsigned int nhiddenlayer;
-    unsigned int ninput;
-    unsigned int nhidden;
-    unsigned int noutput;
-};
+    //
+    class NeuralNetwork
+    {
+    private:
+        std::vector<Layer> m_layers;
 
+        size_t m_size;
 
-//
-class NeuralNetwork
-{
-private :
+        double m_score;
+        double m_fitness;
 
+    public:
+        NeuralNetwork(NeuralParameters const &params);
+        NeuralNetwork(NeuralNetwork const &other);
+        NeuralNetwork(NeuralNetwork&& other);
 
-    std::vector<Layer> layers;
+        NeuralNetwork &operator=(NeuralNetwork const &other);
+        NeuralNetwork &operator=(NeuralNetwork &&other);
 
-    size_t size;
-        
-    double score;
-    double fitness;
-    
-public :
+        Layer &operator[](size_t index) {
+            return m_layers[index];
+        }
 
+        Layer const &operator[](size_t index) const {
+            return m_layers[index];
+        }
 
-    NeuralNetwork(NeuralParameters const& params);
-    NeuralNetwork(NeuralNetwork const& other);
+        //void init();
 
-    NeuralNetwork& operator=(NeuralNetwork const& other);
-    NeuralNetwork& operator=(NeuralNetwork&& other);
+        size_t compute(std::vector<double> const &inputs); //lance le calcul du nn
+        size_t output() const;                             //va chercher le résultat du calcul
 
-    Layer& operator[](size_t index);
-    Layer const& operator[](size_t index) const;
+        void score(double score) {
+            m_score = score;
+        } // set le score d'un nn
 
-    //void init();
+        double score() const {
+            return m_score;
+        }
 
-    size_t compute(std::vector<double> const& inputs); //lance le calcul du nn 
-    size_t output() const; //va chercher le résultat du calcul
+        void fitness(double fitness) {
+            m_fitness = fitness;
+        } // set le fitness d'un nn
 
-    void score(double score);// set le score d'un nn 
-    double score() const;
+        double fitness() const {
+            return m_fitness;
+        }
 
-    void fitness(double fitness);// set le fitness d'un nn 
-    double fitness() const;
+        void crossover(NeuralNetwork const &first, NeuralNetwork const &second, double const crossover_rate);
+        void mutate(double const mutation_rate); //mute un nn
+    };
 
-    void crossover(NeuralNetwork const& first, NeuralNetwork const& second);
-    void mutate();//mute un nn
-};
+    //
 
+    class Game
+    {
+    public:
+        virtual bool operator()(NeuralNetwork &nn) = 0;
+    };
 
-//
+    //
+    class Population
+    {
+    private:
+        std::vector<NeuralNetwork> *m_curr_population;
+        std::vector<NeuralNetwork> *m_old_population;
 
-class Game {
-    public :
+        std::vector<NeuralNetwork> m_first_population;
+        std::vector<NeuralNetwork> m_second_population;
 
-    virtual bool operator() (NeuralNetwork& nn) = 0;
-};
+        NeuralParameters m_params;
 
+        size_t m_size;
 
-//
-class Population
-{
-private:
-    std::vector<NeuralNetwork> *m_curr_population;
-    std::vector<NeuralNetwork> *m_old_population;
+        NeuralNetwork& pickOne(); //choisi un element aléatoire de la population
+        void calculateFitness();  //calcule la fitness de chaque element de la population
+        void evolve();            //copulation de toute la popolation
 
-    std::vector<NeuralNetwork> m_first_population;
-    std::vector<NeuralNetwork> m_second_population;
+    public:
+        Population(unsigned population_size, NeuralParameters const &params);
 
-    NeuralParameters m_params;
-    NeuralNetwork *  pickOne();//choisi un element aléatoire de la population
-    void calculateFitness(); //calcule la fitness de chaque element de la population
-    void evolve(); //copulation de toute la popolation
+        Population(Population const &other);
+        Population(Population&& other);
 
+        Population &operator=(Population const &other);
+        Population &operator=(Population&& other);
 
-public:
-    Population(unsigned population_size, NeuralParameters const &params);
+        void run(Game &game);
 
-    Population(Population const& other) = delete;
-    Population& operator=(Population const& other) = delete;
+        NeuralNetwork &bestElement();
+        NeuralNetwork const &bestElement() const;
 
-    void run(Game& game);
+        NeuralNetwork &operator[](size_t index) {
+            return m_curr_population->at(index);
+        }
 
-    NeuralNetwork& bestElement();
-    NeuralNetwork const& bestElement() const;
-    
-    NeuralNetwork& operator[](size_t index);
-    NeuralNetwork const& operator[](size_t index) const;
-};
+        NeuralNetwork const &operator[](size_t index) const {
+            return m_curr_population->at(index);
+        }
+    };
 
-//
-class NeuralPrinter {
-    void printNetwork(NeuralNetwork const& nn);//affichage 
-    void printPopulaton(Population const& pop);//print population
-};
+    //
+    class NeuralPrinter
+    {
+        void printNetwork(NeuralNetwork const &nn); //affichage
+        void printPopulaton(Population const &pop); //print population
+    };
 
-
-/*
+} // namespace neuralnetwork
+  /*
 #define TAILLE_POPULATION 1000
 #define NB_INPUT 8
 #define NB_HIDDEN_LAYER 1
